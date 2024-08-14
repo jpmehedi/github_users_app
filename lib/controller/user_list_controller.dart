@@ -13,7 +13,7 @@ final userListProvider = ChangeNotifierProvider((ref)=> UserListController());
 class UserListController extends ChangeNotifier{
   final TextEditingController _searchController = TextEditingController();
   TextEditingController get searchController=> _searchController;
-  final List<UserListModel> _users = <UserListModel>[];
+  List<UserListModel> _users = <UserListModel>[];
   List get users => _users;
   UserListController(){
     fetchUsers();
@@ -37,7 +37,7 @@ class UserListController extends ChangeNotifier{
       'Authorization': 'token ${ApiEndPoint.token}',
     },
   );
-
+  logger.f(response.statusCode);
   if (response.statusCode == 200) {
     final List<dynamic> data = json.decode(response.body);
     List<UserListModel> users = data.map((json) => UserListModel.fromJson(json)).toList();
@@ -51,21 +51,10 @@ class UserListController extends ChangeNotifier{
 }
 
   Future<void> searchUser(String query) async {
-    final response = await http.get(
-      Uri.parse('https://api.github.com/search/users?q=$query'),
-      headers: {
-      'Authorization': 'token ${ApiEndPoint.token}',
-      },
-    );
-
-    if(response.statusCode == 200){
-      final decodedData = json.decode(response.body);
-      List<dynamic> data = decodedData["items"];
-      List<UserListModel> userListModel = data.map((json) => UserListModel.fromJson(json)).toList();
-      _users.addAll(userListModel);
-    }else{
-      debugPrint("User not found");
+    if(query.isEmpty){
+      fetchUsers();
     }
+   _users =  _users.where((user) => user.login.toLowerCase().contains(query.toLowerCase())).toList();
     notifyListeners();
   }
   

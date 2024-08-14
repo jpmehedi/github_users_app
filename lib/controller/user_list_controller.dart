@@ -1,0 +1,72 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:github_users/model/user_list_model.dart';
+import 'package:github_users/utilities/api_endpoint.dart';
+import 'package:github_users/utilities/global.dart';
+import 'package:http/http.dart' as http;
+
+final userListProvider = ChangeNotifierProvider((ref)=> UserListController());
+
+class UserListController extends ChangeNotifier{
+  final TextEditingController _searchController = TextEditingController();
+  TextEditingController get searchController=> _searchController;
+  final List<UserListModel> _users = <UserListModel>[];
+  List get users => _users;
+  UserListController(){
+    fetchUsers();
+  }
+
+    
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
+
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+ Future<void> fetchUsers() async {
+  _users.clear();
+  setLoading(true);
+  final response = await http.get(
+    Uri.parse('https://api.github.com/users'),
+    headers: {
+      'Authorization': 'token ${ApiEndPoint.token}',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body);
+    List<UserListModel> users = data.map((json) => UserListModel.fromJson(json)).toList();
+    _users.addAll(users);
+    setLoading(false);
+  } else {
+    logger.e('Failed to load users');
+  }
+
+  notifyListeners();
+}
+
+  Future<void> searchUser(String query) async {
+    final response = await http.get(
+      Uri.parse('https://api.github.com/search/users?q=$query'),
+      headers: {
+      'Authorization': 'token ${ApiEndPoint.token}',
+      },
+    );
+
+    if(response.statusCode == 200){
+      final decodedData = json.decode(response.body);
+      List<dynamic> data = decodedData["items"];
+      List<UserListModel> userListModel = data.map((json) => UserListModel.fromJson(json)).toList();
+      _users.addAll(userListModel);
+    }else{
+      debugPrint("User not found");
+    }
+    notifyListeners();
+  }
+  
+}

@@ -22,10 +22,10 @@ class UserListScreen extends ConsumerWidget {
             TextField(
               controller: userListController.searchController,
               decoration: const InputDecoration(hintText: 'Search Users...'),
-              onSubmitted: userListController.searchUser,
+              onChanged: userListController.searchUser,
             ),
-            userListController.isLoading ?  const Center(child: CircularProgressIndicator()) : Flexible(
-              child: ListView.builder(
+            Flexible(
+              child:  userListController.isLoading ? const Center(child: CircularProgressIndicator()) : ListView.builder(
                 shrinkWrap: true,
                 itemCount: userListController.users.length,
                 itemBuilder: (context, index) {

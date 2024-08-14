@@ -19,6 +19,7 @@ class ThemeNotifier extends ChangeNotifier {
     _themeData = ThemeData.light();
     notifyListeners();
   }
+
 }
 
 

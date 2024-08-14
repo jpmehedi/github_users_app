@@ -15,10 +15,17 @@ class UserListController extends ChangeNotifier{
   TextEditingController get searchController=> _searchController;
   List<UserListModel> _users = <UserListModel>[];
   List get users => _users;
+  String _userName  = "";
+  String get userName => _userName;
+  
   UserListController(){
     fetchUsers();
   }
 
+  void selectedUser(user){
+    _userName = user;
+    notifyListeners();
+  }
     
   bool _isLoading = false;
 
@@ -32,7 +39,7 @@ class UserListController extends ChangeNotifier{
   _users.clear();
   setLoading(true);
   final response = await http.get(
-    Uri.parse('https://api.github.com/users'),
+    Uri.parse(ApiEndPoint.url),
     headers: {
       'Authorization': 'token ${ApiEndPoint.token}',
     },
@@ -40,6 +47,7 @@ class UserListController extends ChangeNotifier{
   logger.f(response.statusCode);
   if (response.statusCode == 200) {
     final List<dynamic> data = json.decode(response.body);
+    logger.f(data.first);
     List<UserListModel> users = data.map((json) => UserListModel.fromJson(json)).toList();
     _users.addAll(users);
     setLoading(false);

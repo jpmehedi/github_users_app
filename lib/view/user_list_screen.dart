@@ -35,6 +35,7 @@ class UserListScreen extends ConsumerWidget {
                     ),
                     title: Text(userListController.users[index].login),
                     onTap: (){
+                      userListController.selectedUser(userListController.users[index].login);
                       context.push(RoutePath.userRepoScreen);
                     },
                   );

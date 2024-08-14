@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:github_users/controller/user_list_controller.dart';
 import 'package:github_users/controller/user_repo_controller.dart';
+import 'package:github_users/controller/web_view_controller.dart';
+import 'package:github_users/model/user_info_model.dart';
+import 'package:github_users/model/user_repo_model.dart';
 import 'package:github_users/router/route_path.dart';
 import 'package:go_router/go_router.dart';
 class UserRepoScreen extends ConsumerWidget {
@@ -9,32 +13,40 @@ class UserRepoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userRepoController = ref.watch(userRepoProvider);
+    final userListController = ref.watch(userListProvider);
+    final viewController = ref.watch(viewProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Users Name"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ), 
+        backgroundColor: Colors.teal,
+        title: const Text("User Repository List", style: TextStyle(color: Colors.white),),
       ),
       body: FutureBuilder(
-        future: Future.wait([userRepoController.fetchUserDetails(), userRepoController.fetchRepositories()]),
+        future: Future.wait([userRepoController.fetchUserDetails(userListController.userName), userRepoController.fetchRepositories(userListController.userName)]),
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final userDetails = snapshot.data![0];
+          UserInfoModel userInfoModel = UserInfoModel.fromJson(snapshot.data![0]);
           final repositories = snapshot.data![1].where((repo) => !repo['fork']).toList();
-
           return SingleChildScrollView(
             child: Column(
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: NetworkImage(userDetails['avatar_url']),
+                    radius: 50,
+                    backgroundImage: NetworkImage(userInfoModel.avatarUrl!),
                   ),
-                  title: Text(userDetails['name'] ?? "username"),
+                  title: Text(userInfoModel.name!,  style: const TextStyle(fontSize: 20)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Followers: ${userDetails['followers']}'),
-                      Text('Following: ${userDetails['following']}'),
+                      Text('User name: ${userInfoModel.login}', style: const TextStyle(fontSize: 18),),
+                      Text('Followers: ${userInfoModel.followers}', style: const TextStyle(fontSize: 18),),
+                      Text('Following: ${userInfoModel.following}', style: const TextStyle(fontSize: 18)),
                     ],
                   ),
                 ),
@@ -45,8 +57,9 @@ class UserRepoScreen extends ConsumerWidget {
                   itemCount: repositories.length,
                   itemBuilder: (context, index) {
                     final repo = repositories[index];
-                    return ListTile(
-                      title: Text(repo['name']),
+                    UserRepoModel userRepoModel = UserRepoModel.fromJson(repo);
+                    return  ListTile(
+                      title: Text(userRepoModel.name),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -56,6 +69,7 @@ class UserRepoScreen extends ConsumerWidget {
                         ],
                       ),
                       onTap: (){
+                        viewController.loadWebView(repo['html_url']);
                         context.push(RoutePath.webViewScreen);
                       }
                     );
@@ -69,5 +83,7 @@ class UserRepoScreen extends ConsumerWidget {
     );
   }
 }
+
+
 
 

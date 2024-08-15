@@ -33,7 +33,15 @@ Before starting, ensure you have met the following requirements:
    ```bash
    flutter pub get
    ```
+## Configuration
 
+Before running the app, please explore `lib/utilities/api_endpoint.dart` and update the following line with your GitHub personal access token:
+
+```dart
+const String githubToken = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN";
+```
+
+> **Note:** Make sure to keep your personal access token secure and never commit it to a public repository.
 ### Running the Project
 
 1. Ensure a device is connected or an emulator is running:

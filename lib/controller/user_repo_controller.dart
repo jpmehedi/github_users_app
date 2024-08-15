@@ -15,7 +15,7 @@ Future<Map<String, dynamic>> fetchUserDetails(String userName) async {
   final response = await http.get(
     uri,
     headers: {
-      'Authorization': 'token ${ApiEndPoint.token}',
+      'Authorization': 'githubToken ${ApiEndPoint.githubToken}',
       'Accept': 'application/vnd.github.v3+json',
     },
   );
@@ -37,7 +37,7 @@ Future<Map<String, dynamic>> fetchUserDetails(String userName) async {
 
   final uri = Uri.parse('${ApiEndPoint.url}/$userName/repos');
   final response = await http.get(uri, headers: {
-    'Authorization': 'token ${ApiEndPoint.token}',
+    'Authorization': 'githubToken ${ApiEndPoint.githubToken}',
     'Accept': 'application/vnd.github.v3+json',
   });
 

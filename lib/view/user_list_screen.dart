@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:github_users/controller/user_list_controller.dart';
 import 'package:github_users/router/route_path.dart';
+import 'package:github_users/theme/app_strings.dart';
 import 'package:go_router/go_router.dart';
 
 class UserListScreen extends ConsumerWidget {
@@ -12,7 +13,7 @@ class UserListScreen extends ConsumerWidget {
     final userListController = ref.watch(userListProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Github Users", style: TextStyle(color: Colors.white),),
+        title: const Text(AppStrings.userList, style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.teal,
       ),
       body: Padding(

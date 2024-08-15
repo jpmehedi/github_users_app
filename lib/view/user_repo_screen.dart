@@ -6,6 +6,7 @@ import 'package:github_users/controller/web_view_controller.dart';
 import 'package:github_users/model/user_info_model.dart';
 import 'package:github_users/model/user_repo_model.dart';
 import 'package:github_users/router/route_path.dart';
+import 'package:github_users/theme/app_strings.dart';
 import 'package:go_router/go_router.dart';
 class UserRepoScreen extends ConsumerWidget {
   const UserRepoScreen({super.key});
@@ -22,63 +23,74 @@ class UserRepoScreen extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ), 
         backgroundColor: Colors.teal,
-        title: const Text("User Repository List", style: TextStyle(color: Colors.white),),
+        title: const Text(AppStrings.userRepository, style: TextStyle(color: Colors.white),),
       ),
-      body: FutureBuilder(
-        future: Future.wait([userRepoController.fetchUserDetails(userListController.userName), userRepoController.fetchRepositories(userListController.userName)]),
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          UserInfoModel userInfoModel = UserInfoModel.fromJson(snapshot.data![0]);
-          final repositories = snapshot.data![1].where((repo) => !repo['fork']).toList();
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage(userInfoModel.avatarUrl!),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: FutureBuilder(
+          future: Future.wait([userRepoController.fetchUserDetails(userListController.userName), userRepoController.fetchRepositories(userListController.userName)]),
+          builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            UserInfoModel userInfoModel = UserInfoModel.fromJson(snapshot.data![0]);
+            final repositories = snapshot.data![1].where((repo) => !repo['fork']).toList();
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(userInfoModel.avatarUrl!),
+                    ),
+                    title: Text(userInfoModel.name!,  style: const TextStyle(fontSize: 20)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${AppStrings.userName}: ${userInfoModel.login}', style: const TextStyle(fontSize: 18),),
+                        Text('${AppStrings.followers}: ${userInfoModel.followers}', style: const TextStyle(fontSize: 18),),
+                        Text('${AppStrings.following}: ${userInfoModel.following}', style: const TextStyle(fontSize: 18)),
+                      ],
+                    ),
                   ),
-                  title: Text(userInfoModel.name!,  style: const TextStyle(fontSize: 20)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('User name: ${userInfoModel.login}', style: const TextStyle(fontSize: 18),),
-                      Text('Followers: ${userInfoModel.followers}', style: const TextStyle(fontSize: 18),),
-                      Text('Following: ${userInfoModel.following}', style: const TextStyle(fontSize: 18)),
-                    ],
+                  const Divider(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: repositories.length,
+                    itemBuilder: (context, index) {
+                      final repo = repositories[index];
+                      UserRepoModel userRepoModel = UserRepoModel.fromJson(repo);
+                      return  Card(
+                        child: ListTile(
+                          title: Text(userRepoModel.name, style: const  TextStyle(fontSize: 22),),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text('${AppStrings.language}: ${userRepoModel.language ?? 'N/A'}', style: const TextStyle(fontSize: 18),),
+                                  const SizedBox(width: 16,),
+                                  Text('${AppStrings.star}: ${userRepoModel.stargazersCount}', style: const TextStyle(fontSize: 18),),
+                               ],
+                              ),
+                              Text(userRepoModel.description ?? '', style: const TextStyle(fontSize: 16),),
+                            ],
+                          ),
+                          onTap: (){
+                            viewController.loadWebView(userRepoModel.htmlUrl);
+                            context.push(RoutePath.webViewScreen);
+                          }
+                        ),
+                      );
+                    },
                   ),
-                ),
-                const Divider(),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: repositories.length,
-                  itemBuilder: (context, index) {
-                    final repo = repositories[index];
-                    UserRepoModel userRepoModel = UserRepoModel.fromJson(repo);
-                    return  ListTile(
-                      title: Text(userRepoModel.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Language: ${repo['language'] ?? 'N/A'}'),
-                          Text('Stars: ${repo['stargazers_count']}'),
-                          Text(repo['description'] ?? ''),
-                        ],
-                      ),
-                      onTap: (){
-                        viewController.loadWebView(repo['html_url']);
-                        context.push(RoutePath.webViewScreen);
-                      }
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

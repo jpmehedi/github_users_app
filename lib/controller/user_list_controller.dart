@@ -41,7 +41,7 @@ class UserListController extends ChangeNotifier{
   final response = await http.get(
     Uri.parse(ApiEndPoint.url),
     headers: {
-      'Authorization': 'token ${ApiEndPoint.token}',
+      'Authorization': 'githubToken ${ApiEndPoint.githubToken}',
     },
   );
   logger.f(response.statusCode);

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:github_users/controller/web_view_controller.dart';
+import 'package:github_users/theme/app_strings.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends ConsumerWidget {
@@ -18,7 +19,7 @@ class WebViewScreen extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ), 
         backgroundColor: Colors.teal,
-        title: const Text("Repository", style: TextStyle(color: Colors.white),),
+        title: const Text(AppStrings.repository, style: TextStyle(color: Colors.white),),
       ),
       body: webViewController.loadingPercentage < 100 ? 
        const Center(child: CircularProgressIndicator()) : WebViewWidget(
